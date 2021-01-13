@@ -35,6 +35,7 @@ def vcf_genotypes(fn,chrom="igh"):
 vcf_fofh = open(vcf_fofn,'r')
 for i,fn in enumerate(vcf_fofh):
     fn = fn.rstrip()
+    print fn
     fn_genotypes = vcf_genotypes(fn)
     if i == 0:
         genotypes = fn_genotypes
@@ -42,6 +43,12 @@ for i,fn in enumerate(vcf_fofh):
     genotypes = genotypes.merge(fn_genotypes,how="outer",on="pos") 
 
 genotypes = genotypes.fillna('None')
+
+cols = genotypes.columns.tolist()
+cols.remove('pos')
+cols = ['pos'] + cols
+genotypes = genotypes[cols]
+
 genotypes.to_csv(path_or_buf = matrixfn,
                  index = False,
                  sep = "\t")
