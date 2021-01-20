@@ -42,7 +42,6 @@ for i,fn in enumerate(vcf_fofh):
         continue
     genotypes = genotypes.merge(fn_genotypes,how="outer",on="pos") 
 
-genotypes = genotypes.fillna('None')
 
 cols = genotypes.columns.tolist()
 cols.remove('pos')
@@ -51,4 +50,5 @@ genotypes = genotypes[cols]
 
 genotypes.to_csv(path_or_buf = matrixfn,
                  index = False,
+                 na_rep='NA',
                  sep = "\t")
