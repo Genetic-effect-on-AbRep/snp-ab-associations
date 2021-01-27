@@ -1,5 +1,6 @@
 #!/bin/env python
 import sys
+import numpy as np
 import pandas as pd
 
 matrix_fofn = sys.argv[1]
@@ -25,21 +26,19 @@ def change_names(map_,current_names):
 
 index = 0    
 new_matrix = None
-row_names = []
 for matrix_fn, names_fn in zip(matrix_fofh,names_fofh):
     names = name_matching(names_fn.rstrip())
     m = pd.read_csv(matrix_fn.rstrip(),sep="\t",index_col=0)
     new_names = change_names(names,list(m.index))
-    row_names += new_names
     m.index = new_names
+    m['samples'] = new_names
     if index == 0:
         new_matrix = m
     else:
-        new_matrix = new_matrix.merge(m,how='outer')
-        #new_matrix = new_matrix.set_index('Subject').join(m.set_index('Subject'))
+        common_columns = list(np.intersect1d(new_matrix.columns,m.columns))
+        new_matrix = new_matrix.merge(m,how='outer',on=common_columns)
     index += 1
 
-new_matrix.index = row_names
-new_matrix.to_csv(merged_matrix,sep="\t",index_label='Subject')
-
-
+new_matrix.index = new_matrix['samples']
+new_matrix.drop(['samples'],axis=1,inplace=True)
+new_matrix.to_csv(merged_matrix,sep="\t",index_label='Subject',na_rep="NA")
